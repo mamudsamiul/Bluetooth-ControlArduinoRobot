@@ -1,0 +1,150 @@
+#include <SoftwareSerial.h>
+#include <Servo.h>
+
+Servo myservo;  // create servo object to control a servo
+SoftwareSerial mySerial(2,3); // RX, TX
+char dataIn='S';
+char determinant;
+char det;
+int vel = 200; //Bluetooth Stuff
+int overdrive = 13; //Press Toggle Switch #1, the pin13 LED will light up
+void setup(){
+Serial.begin(9600);
+mySerial.begin(9600);
+  pinMode(4,OUTPUT);
+  pinMode(5,OUTPUT);
+  pinMode(6,OUTPUT);
+  pinMode(7,OUTPUT);
+  myservo.attach(9);
+  delay(100);
+  myservo.write(90);
+  delay(100);
+
+
+}
+
+void loop(){ 
+      det = check();  // You'll need to reconstruct this if your not using the Pololu Dual VNH5019
+      while (det == 'F')   // F, move forward
+       {
+       forward();
+       det = check();}
+     
+      while (det == 'B')   // B, move back
+       { 
+        
+        backward();
+        det = check();}
+
+      while (det == 'L')   // L, move wheels left
+       {
+        left();
+       det = check();}
+      
+      while (det == 'R')   // R, move wheels right
+       {right();
+       det = check();}
+    
+      while (det == 'I')   // I, turn right forward
+       {rightforward();
+       det = check();}
+    
+      while (det == 'J')   // J, turn right back
+       {rightbackward();
+       det = check();}  
+     
+      while (det == 'G')   // G, turn left forward
+       {leftforward();
+       det = check();}
+    
+      while (det == 'H')   // H, turn left back
+       {leftbackward();
+       det = check();}  
+     
+      while (det == 'S')   // S, stop
+       {
+       stop();
+       det = check();}
+       while (det == 'W')   // W, servo
+       {myservo.write(0);
+       delay(100);
+       det = check();}
+       while (det == 'w')   // w, servo
+       {myservo.write(90);
+       delay(100);
+       det = check();}
+}
+
+int check()
+{if (mySerial.available() > 0) {dataIn = mySerial.read(); 
+        //Serial.println(dataIn);
+        if (dataIn == 'F'){determinant = 'F';} 
+        else if (dataIn == 'B'){determinant = 'B';}else if (dataIn == 'L'){determinant = 'L';}
+        else if (dataIn == 'R'){determinant = 'R';}else if (dataIn == 'I'){determinant = 'I';} 
+        else if (dataIn == 'J'){determinant = 'J';}else if (dataIn == 'G'){determinant = 'G';}   
+        else if (dataIn == 'H'){determinant = 'H';}else if (dataIn == 'S'){determinant = 'S';}
+        else if (dataIn == 'q'){vel = 255;}else if (dataIn == '9'){vel = 235;}
+        else if (dataIn == '8'){vel = 215;}else if (dataIn == '7'){vel = 195;}
+        else if (dataIn == '6'){vel = 175;}else if (dataIn == '5'){vel = 155;}
+        else if (dataIn == '4'){vel = 135;}else if (dataIn == '3'){vel = 115;}
+        else if (dataIn == '2'){vel = 95;}else if (dataIn == '1'){vel = 75;}
+        else if (dataIn == '0'){vel = 55;}
+        else if (dataIn == 'U'){determinant = 'U';}else if (dataIn == 'u'){determinant = 'u';}
+        else if (dataIn == 'W'){determinant = 'W';}else if (dataIn == 'w'){determinant = 'w';}
+        
+        }return determinant;}
+    void forward(){
+      digitalWrite(4,1);
+      analogWrite(5,(255-vel));
+      analogWrite(6,vel);
+      digitalWrite(7,0); 
+      }
+      void backward(){
+      digitalWrite(4,0);
+      analogWrite(5,vel);
+      analogWrite(6,(255-vel));
+      digitalWrite(7,1); 
+      }
+      void stop(){
+        digitalWrite(4,0);
+        digitalWrite(5,0);
+        digitalWrite(6,0);
+        digitalWrite(7,0);
+        }
+      void left(){
+      digitalWrite(4,1);
+      analogWrite(5,(255-vel));
+      analogWrite(6,(255-vel));
+      digitalWrite(7,1); 
+      }
+      void right(){
+      digitalWrite(4,0);
+      analogWrite(5,vel);
+      analogWrite(6,vel);
+      digitalWrite(7,0); 
+      }
+      void rightforward(){
+      digitalWrite(4,1);
+      analogWrite(5,(255-vel));
+      analogWrite(6,vel/2);
+      digitalWrite(7,0); 
+      }
+      void leftforward(){
+      digitalWrite(4,1);
+      analogWrite(5,((((510-vel)/(255-vel))/2)*(255-vel)));
+      analogWrite(6,vel);
+      digitalWrite(7,0); 
+      }
+      void rightbackward(){
+      digitalWrite(4,0);
+      analogWrite(5,vel);
+      analogWrite(6,((((510-vel)/(255-vel))/2)*(255-vel)));
+      digitalWrite(7,1); 
+      }
+      void leftbackward(){
+      digitalWrite(4,0);
+      analogWrite(5,vel/2);
+      analogWrite(6,(255-vel));
+      digitalWrite(7,1); 
+      }
+        
